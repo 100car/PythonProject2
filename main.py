@@ -11,7 +11,6 @@
 #  зміна валюти
 #  поповнення балансу(валюта та сама)
 #  зняття грошей з балансу(валюта та сама).
-from types import new_class
 
 # https://bank.gov.ua/ua/markets/exchangerates + гривня). Де три, там усі:
 CURRENCY_RATES = {
