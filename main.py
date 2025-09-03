@@ -1,75 +1,221 @@
 # Завдання 1
-# Створіть клас Recipe з атрибутами
-#    name – назва страви
-#    ingredients – список продуктів
-#    text – текст рецепту
-#    time – час приготування
-# методи:
-#    __str__(self) – повертає назву страви
-#    __contains__(self, item) – перевіряє чи є інгредієнт в рецепті
-#    __gt__(self, other) – перевіряє чи є час приготування self більшим за other
-#    display_info(self) – виводить всю інформацію про рецепт
-# Створіть декілька рецептів та добавте їх у список.
-# Виведіть назви тих рецептів, які містять інгредієнт томат
-# Виведіть повну інформацію рецепта з найменшим часом приготування, скористайтесь функцією min
+# Створіть абстрактний клас Character, атрибути
+# name – ім’я
+# max_hp – максимальний рівень здоров’я
+# hp – нинішній рівень здоров’я
+# level – рівень персонажа(від 1 до 20)
+# intelligence – стат інтелекту
+# strength – стат сили
+# dexterity – стат спритності
+# mana – стат мани
+# defense – стат захисту
+# Методи:
+# attack() – абстрактний метод
+# take_damage(damage) – отримує урон, зменшений на
+# захист
+# level_up() – збільшує рівень
+# increase_stat(stat) – збільшує один з статів на 1
+# rest() – відпочинок(відновлює hp до максимального)
+# heal(heal_hp) – збільшує hp на heal_hp
+import abc
 
-class Recipe:
-    def __init__(self, name, ingredients, text, time):
+
+class Character(abc.ABC):
+    def __init__(self, name, max_hp, hp, level, intelligence, strength, dexterity, mana, defense):
         self.name = name
-        self.ingredients = ingredients or []
-        self.text = text
-        self.time = time
+        self.max_hp = max_hp
+        self.hp = hp
+        self.level = level
+        self.intelligence = intelligence
+        self.strength = strength
+        self.dexterity = dexterity
+        self.mana = mana
+        self.defense = defense
 
-    def __str__(self):
-        return f"{self.name}"
+    @abc.abstractmethod
+    def attack(self):
+        raise NotImplementedError("This method should be implemented")
 
-    def __contains__(self, item):
-        return item.lower() in (ing.lower() for ing in self.ingredients)
+    def take_damage(self, damage):
+        damage_level = damage - self.defense
+        if damage_level > 0:
+            print(f"You took damage.")
+            self.hp -= damage_level
+            self.hp  = max (0, self.hp)
+            print(f"Your current HP: {self.hp}")
+        else:
+            print(f"You are not damaged")
 
-    def __gt__(self, other):
-        return self.time > other.time
-        # if self.time > other:
-        #     print(f"Час {self.time} більший, ніж {other}")
-        # else:
-        #     print(f"Час {self.time} менший, ніж {other}")
+    def level_up(self):
+        self.level += 1
+        print("You are leveled up")
 
-    def display_info(self):
-        print(f"Рецепт '{self.name}':")
-        print(f"\tСписок продуктів: {', '.join(self.ingredients)}.")
-        print(f"\tРецепт: {self.text}.")
-        print(f"\tЧас приготування: {self.time} хв.")
+    def increase_stat(self, stat):
+        if stat == "intelligence":
+            self.intelligence += 1
+            print(f"You boosted your {stat}")
 
-recipe1 = Recipe("Піца",
- ["борошно", "вода", "дріжджі", "томат", "сир"],
- "Готуємо тісто, додаємо інгредієнти та запікаємо", 30)
+        elif stat == "strength":
+            self.strength += 1
+            print(f"You boosted your {stat}")
 
-recipe2 =Recipe("Салат",
- ["томат", "огірок", "зелень", "олія"],
- "Нарізаємо овочі, додаємо зелень та поливаємо олією", 10)
+        elif stat == "dexterity":
+            self.dexterity += 1
+            print(f"You boosted your {stat}")
 
-recipe3 = Recipe("Суп",
- ["вода", "картопля", "морква", "м'ясо"],
- "Варимо всі інгредієнти до готовності",45)
+        elif stat == "mana":
+            self.mana += 1
+            print(f"You boosted your {stat}")
 
-recipe_list = [recipe1, recipe2, recipe3]
-# тестуємо
-# for _ in recipe_list:
-#     _.display_info()
+        elif stat == "defense":
+            self.defense += 1
+            print(f"You boosted your {stat}")
 
-# Виведіть назви тих рецептів, які містять інгредієнт томат
-print("Інгредієнт 'томат' є в таких рецептах:")
-for item in recipe_list:
-    if "томат" in item:
-        print(item)
+        else:
+            raise ValueError("Wrong stat")
 
-# Виведіть повну інформацію рецепта з найменшим часом приготування
-print("\nРецепт з найменшим часом приготування:")
-min_recipe = min(recipe_list)
-min_recipe.display_info()
+    def rest(self):
+        self.hp = self.max_hp
+        print("You use rest")
+
+    def heal(self, heal_hp):
+        self.hp += heal_hp
+
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+        print("You healed your HP")
+
+# Завдання 4
+# Створіть дочірній клас Warrior
+# Методи:
+#  attack() – наносить 4*strength+3 урону
+#  power_strike(enemies) – проходить по списку ворогів: якщо їхній рівень менший за рівень персонажа, то знищує його повністю
+
+# hero1 = Character("John", 100, 80, 3,80, 76, 50, 30, 25)
+# hero1.take_damage(10)
+
+class Warrior(Character):
+    def attack(self):
+        change = 4 * self.strength + 3
+        print(f"Нанесено {change} одиниць урону!")
+        return change
+
+    def power_strike(self, enemies):
+        for enemy in enemies:
+            if enemy.level < self.level:
+                enemy.hp = 0
+                print("Ворога знищено")
+            else:
+                print("Ворог вижив")
+
+
+class Enemy(Character):
+    def attack(self):
+        pass
+
+class Paladin(Character):
+    """
+    # Методи:
+#  attack() – наносить 4*strength урону та зменшує mana на
+# 5, якщо недостатньо, то наносить strength урону
+#  shield() – збільшує стат defense на 4+level
+#  unshield() – зменшує стат defense на 4+level
+#  heal_ally(ally) – лікує союзника на 5 + 2*level + 0.5*mana
+    """
+    def __init__(self, name, max_hp, hp, level, intelligence, strength, dexterity, mana, defense):
+        super().__init__(name, max_hp, hp, level, intelligence, strength, dexterity, mana, defense)
+        self.is_protected = False
+
+    def attack(self):
+        if self.mana >= 5:
+            self.mana -= 5
+            return self.strength * 4
+        else:
+            return self.strength
+
+    #  – збільшує стат defense на 4+level
+    def shield(self):
+        if not self.is_protected:
+            self.defense += 4
+            self.defense += self.level
+            self.is_protected = True
+
+    #  –  зменшує стат defense на 4+level
+    def unshield(self):
+        if self.is_protected:
+            self.defense -= 4
+            self.defense -= self.level
+            self.is_protected = False
+
+    # heal_ally(ally) – лікує союзника на 5 + 2*level + 0.5*mana
+    def heal_ally(self, ally: Character):
+        value = self.level*2 + self.mana*0.2 + 5
+        ally.heal(value)
+
+    def rest(self):
+        super().rest()
+
+        self.mana += 6
+
+# p1.shield()
+# print(p1.hp)
+#
+# p1.unshield()
+# p1.take_damage(60)
+# print(p1.hp)
+#
+# print("Ataka!")
+# # print(p2.attack())
+# # print(p2.attack())
+# # print(p2.attack())
+# print(p1.attack())
+# print(p1.attack())
+# print(p1.attack())
+#
+# print(p2.attack())
+#
+# print("Heal_ally")
+# print(p2.hp)
+# p1.rest()
+# p1.heal_ally(p2)
+# print(p2.hp)
+
+
+war1 =  Enemy('Tom',100, 60, 6, 10, 46,30,10,15)
+war2 =  Paladin('ТуTom',100, 60, 10, 10, 46,30,10,15)
+p1 = Paladin("John", 100, 80, 3,80, 76, 50, 30, 25)
+p2 = Paladin("Tom", 100, 70, 2,95, 66, 50, 15, 2)
+
+print(p1.defense)
+p1.shield()
+print(p1.defense)
+p1.shield()
+print(p1.defense)
+p1.shield()
+
+print()
+
+print(p1.defense)
+p1.unshield()
+print(p1.defense)
+p1.unshield()
+print(p1.defense)
+p1.unshield()
 
 
 
-
-
-
-
+#
+# my_warior = Warrior('Tom',100, 60, 8, 50, 76,50,20,25)
+#
+# enemies = [war1, war2]
+#
+# print(war1.hp)
+# print(war2.hp)
+#
+# my_warior.power_strike(enemies)
+#
+# print(war1.hp)
+# print(war2.hp)
+#
+#
