@@ -1,78 +1,80 @@
+import DoubleLinkedList
+
+from typing import List
+from DoubleLinkedList import DoubleLinkedList
+
 # Завдання 1
-# Створіть клас Passenger з атрибутами
-#  name – ім’я
-#  destination – місце, куди прямує
-import typing
-
-class Passenger:
-    def __init__(self, name, destination):
-        self.name = name
-        self.destination = destination
-
-# Завдання 2
-# Створіть клас Transport з атрибутами
-#  speed – швидкість
+# Використовуючи класи з практичної реалізуйте клас Shop з трьома чергами до кас.
+# Кожна черга реалізується через двозв’язний список
+# Атрибути
+#  queue1, queue2, queue3 – черги до кас
 # Методи
-#  move(destination, distance) – рухається до місця призначення, виводить інформацію як довго їхали
+#  add_buyer(name, idx) – додає покупця в кінець черги номер idx
+#  serve_buyer(idx) – обслуговує покупця з черги idx (вивести повідомлення та видалити покупця з черги) Якщо черга
+# стала порожньою, то викликати _reorder(idx)
+#  _reorder(idx) – з усіх черг останній покупець переходить в чергу з номером idx
+#  display_info() – виводить на екран 3 черги
 
-class Transport:
-    def __init__(self, speed):
-        if speed <= 0:
-            raise ValueError("Швидкість має бути > 0.")
-        self.speed = speed
+class Shop:
+    def __init__(self, num_of_queues: int):
+        self.num_of_queues = num_of_queues
+        self.queues: List[DoubleLinkedList] = [DoubleLinkedList() for _ in range(num_of_queues)]
 
-    def move(self, destination, distance):
-        time_to_destination = distance / self.speed
-        print(f"До місця призначення {destination} доїхали за {time_to_destination:.2f} ГОДИН.")
-
-# Завдання 3
-# Створіть клас Bus з атрибутами
-#  passengers – список пасажирів(об’єкти класу Passenger)
-#  capacity – максимальна можлива кількість пасажирів
-# Методи
-#  board_passenger(passenger) – якщо є місце, додає пасажира
-#  move(destination, distance) – висаджує всіх пасажирів, які хочуть вийти в даному місці
-# (виводить їхню загальну кількість) та викликає батьківський метод move()
-
-class Bus(Transport):
-    def __init__(self, speed: float, capacity: int):
-        super().__init__(speed)
-        self.passengers: typing.List[Passenger] = []
-        self.capacity = capacity
-
-    def board_passenger(self, passenger: Passenger):
-        if len(self.passengers) < self.capacity:
-            self.passengers.append(passenger)
-            print(f"{passenger.name} сів у автобус (їде до {passenger.destination})")
+    def add_buyer(self, name: str, idx: int):
+        if 0 < idx <= len(self.queues):
+            self.queues[idx-1].push_end(name)
         else:
-            print(f"Автобус переповнений! {passenger.name} не може сісти.")
+            raise ValueError("Неправильний номер черги, в яку додаємо покупця.")
 
-    def move(self, destination, distance):
-        to_exit = [p for p in self.passengers if p.destination == destination]
-        for p in to_exit:
-            self.passengers.remove(p)
+    def _reorder(self, idx: int):
+        if 0 < idx <= len(self.queues):
+            moved = False
+            for num in range(len(self.queues)):
+                if num != idx - 1:
+                    last_in_que = self.queues[num].pop_end()
+                    if last_in_que is not None:
+                        self.queues[idx - 1].push_end(last_in_que)
+                        moved = True
+            if moved:
+                print(f"З усіх черг останні покупці попереходили у чергу з номером {idx}.")
+        else:
+            raise ValueError("Неправильний номер черги, яка реорганізується.")
 
-        print(f"У пункті {destination} виходять {len(to_exit)} пасажирів: {[p.name for p in to_exit]}")
-        super().move(destination, distance)
+    def serve_buyer(self, idx: int):
+        if 0 < idx <= len(self.queues):
+            buyer = self.queues[idx - 1].pop_start()
+            if buyer is None:
+                print(f"Черга №{idx} порожня, обслуговувати нікого.")
+            else:
+                print(f"В черзі №{idx} обслужили покупця {buyer}.")
+                if self.queues[idx - 1].head is None:
+                    self._reorder(idx)
+        else:
+            raise ValueError("Неправильний номер черги під час обслуговування.")
+
+    def display_info(self):
+        for index, que in enumerate(self.queues, start = 1):
+            print(f"Черга {index}. {que}")
+        print()
 
 
-p1 = Passenger("Іван", "Київ")
-p2 = Passenger("Оля", "Львів")
-p3 = Passenger("Петро", "Київ")
-p4 = Passenger("Марія", "Одеса")
+shop = Shop(3)
+shop.add_buyer("Олег", 1)
+shop.add_buyer("Марина", 2)
+shop.add_buyer("Марія", 2)
+shop.add_buyer("Андрій", 3)
+shop.add_buyer("Ірина", 1)
+shop.add_buyer("Василь", 2)
+shop.add_buyer("Тетяна", 3)
+shop.add_buyer("Сергій", 3)
+shop.add_buyer("Анна", 3)
 
-bus = Bus(speed=120, capacity=3)
-
-bus.board_passenger(p1)
-bus.board_passenger(p2)
-bus.board_passenger(p3)
-bus.board_passenger(p4)  # переповнено
-
-print("\n--- Поїздка 1 ---")
-bus.move("Київ", 480)  # 480 км
-
-print("\n--- Поїздка 2 ---")
-bus.move("Львів", 300)
-
-print("\n--- Поїздка 3 ---")
-bus.move("Одеса", 500)
+shop.display_info()
+shop.serve_buyer(1)
+shop.serve_buyer(2)
+shop.serve_buyer(3)
+print("Після обслуговування покупців:")
+shop.display_info()
+# shop.serve_buyer(2)
+shop.serve_buyer(1)
+shop. display_info()
