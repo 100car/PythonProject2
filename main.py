@@ -1,66 +1,99 @@
-# Завдання 2
-# Використовуючи стек створіть клас EnterNumber для введення числа в рядку
-# Атрибути:
-#  digits – стек з введеними цифрами
+# Завдання 1
 
 from queue import LifoQueue
-import copy
 
-# DIGITS = set("0123456789")
+# Створіть клас Project
+# Атрибути:
+#  tasks – стек з завданнями, об’єкти класу Task (початкове завдання передається в init)
 
-class EnterNumber:
-    def __init__(self):
-        self.digits = LifoQueue()
+class Task:
+    def __init__(self, name):
+        self.name = name
+        self.subtasks = []
 
-# Методи:
-#  add(digit) – додати нову цифру, вивести помилку якщо не цифра
-#  undo() – видалити останню цифру
-#  get_number() – повернути число
-#  clear() – очистити стек
-
-    def add(self, digit: str):
-        if digit.isdigit() and len(digit) == 1:
-            self.digits.put(digit)
+    def do(self):
+        """
+        Виконує завдання, за потреби розбиває його на підзавдання
+        :return: список підзавдань
+        """
+        if self.subtasks:
+            print(f"Виконую завдання: {self.name}. Розбиваю на підзавдання")
         else:
-            raise ValueError("Введено не цифру!")
+            print(f"Завершено завдання: {self.name}")
 
-    def undo(self):
-        if self.digits.empty():
-            raise IndexError("Стек порожній!")
-
-        self.digits.get()
-
-    def get_number(self):
-        if self.digits.empty():
-            print("Стек порожній!!!")
-            return
-
-        number_str: str = ""
-        while not self.digits.empty():
-            number_str += self.digits.get()
-
-        for char in number_str[::-1]:
-            self.digits.put(char)
-
-        # for i in range(len(number_str)-1, -1, -1):
-        #     self.digits.put(number_str[i])
-
-        return int(number_str[::-1])
-
-    def clear(self):
-        self.digits = LifoQueue()
+        return self.subtasks
 
 
-entry = EnterNumber()
-entry.add('1')
-entry.add('3')
-entry.add('7')
-entry.add('9')
+class Project:
+    def __init__(self, initial_task: Task):
+        self.initial_task = initial_task
+        self.tasks = LifoQueue()
+        self.tasks.put(self.initial_task)
 
-print(entry.get_number())
+    def is_finished(self):
+        return self.tasks.empty()
 
-entry.undo()
-print(entry.get_number())
+    def do_task(self):
+        if not self.is_finished():
+            current_task = self.tasks.get()
+            subtasks = current_task.do()
+            for sub in subtasks:
+                self.tasks.put(sub)
 
-entry.clear()
-print(entry.get_number())
+
+task = Task('Підготовка до зйомок')
+
+task.subtasks = [
+    Task('Пошук локацій'),
+    Task('Підготовка сценарію'),
+    Task('Кастинг акторів')
+]
+
+# Підзавдання для "Пошук локацій"
+task.subtasks[0].subtasks = [
+    Task('Огляд локацій у місті'),
+    Task('Огляд локацій за містом'),
+    Task('Узгодження місць для зйомок')
+]
+
+# Підзавдання для "Підготовка сценарію"
+task.subtasks[1].subtasks = [
+    Task('Написання основного сценарію'),
+    Task('Редагування сценарію'),
+    Task('Підготовка сценарних приміток'),
+]
+
+# Підзавдання для "Кастинг акторів"
+task.subtasks[2].subtasks = [
+    Task('Пошук головних акторів'),
+    Task('Пошук другорядних акторів'),
+    Task('Підготовка контрактів для акторів')
+]
+
+# Підзавдання для "Пошук локацій у місті"
+task.subtasks[0].subtasks[0].subtasks = [
+    Task('Вибір декорацій для зйомок'),
+    Task('Узгодження з власниками приміщень')
+]
+
+# Підзавдання для "Огляд локацій за містом"
+task.subtasks[0].subtasks[1].subtasks = [
+    Task('Вибір лісу для сцени битви'),
+    Task('Пошук старовинних будівель для сцени'),
+]
+
+# Підзавдання для "Написання основного сценарію"
+task.subtasks[1].subtasks[0].subtasks = [
+    Task('Написання першої частини'),
+    Task('Написання другої частини'),
+]
+
+# Підзавдання для "Пошук головних акторів"
+task.subtasks[2].subtasks[0].subtasks = [
+    Task('Пошук актора на роль головного героя'),
+    Task('Пошук актриси на роль головної героїні')
+]
+
+project = Project(task)
+while not project.is_finished():
+    project.do_task()
