@@ -1,99 +1,89 @@
 # Завдання 1
-
-from queue import LifoQueue
-
-# Створіть клас Project
+# Використовуючи бінарні дерева, організуйте роботу автопарку, де зберігаються автомобілі, відсортовані за моделлю(!)
+# У однієї марки може бути багато моделей. У кожної моделі її марки унікальні.
+# Клас Car
 # Атрибути:
-#  tasks – стек з завданнями, об’єкти класу Task (початкове завдання передається в init)
+#  brand – марка (бренд, виробник) автомобіля
+#  model – модель автомобіля
+#  year – рік випуску
 
-class Task:
-    def __init__(self, name):
-        self.name = name
-        self.subtasks = []
+import bintrees
 
-    def do(self):
-        """
-        Виконує завдання, за потреби розбиває його на підзавдання
-        :return: список підзавдань
-        """
-        if self.subtasks:
-            print(f"Виконую завдання: {self.name}. Розбиваю на підзавдання")
+
+class Car:
+    def __init__(self, brand, model, year):
+        self.brand = brand
+        self.model = model
+        self.year = year
+
+    def __str__(self):
+        return f"{self.brand:<15}{self.model:<10}\t{self.year}"
+
+
+class CarPark:
+    def __init__(self):
+        self.cars = bintrees.AVLTree()
+
+    def add(self, brand, model, year):
+        """Додати автомобіль у автопарк"""
+        car = Car(brand, model, year)
+        self.cars.insert(key=model, value=car)
+
+    def display(self):
+        """Вивести всі авто"""
+        print()
+        for model in self.cars:
+            print(self.cars[model])
+
+    def remove(self, model):
+        """Видалити автомобіль"""
+        self.cars.remove(model)
+
+    def search(self, model):
+        """Пошук авто за моделлю"""
+        return self.cars.get(model, None)
+
+    def __len__(self):
+        """Кількість авто"""
+        return len(self.cars)
+
+    def sell_car(self, client, model):
+        """Продати авто клієнту"""
+        if model in self.cars:
+            car = self.cars[model]
+            self.cars.remove(model)
+            print(f"\n{car}\nпродана клієнту {client}")
         else:
-            print(f"Завершено завдання: {self.name}")
-
-        return self.subtasks
-
-
-class Project:
-    def __init__(self, initial_task: Task):
-        self.initial_task = initial_task
-        self.tasks = LifoQueue()
-        self.tasks.put(self.initial_task)
-
-    def is_finished(self):
-        return self.tasks.empty()
-
-    def do_task(self):
-        if not self.is_finished():
-            current_task = self.tasks.get()
-            subtasks = current_task.do()
-            for sub in subtasks:
-                self.tasks.put(sub)
+            print(
+                f"{model} - на жаль, такої моделі немає в нашому автопарку, "
+                f"клієнту {client} ми нічим не допоможемо"
+            )
 
 
-task = Task('Підготовка до зйомок')
+my_cars = CarPark()
 
-task.subtasks = [
-    Task('Пошук локацій'),
-    Task('Підготовка сценарію'),
-    Task('Кастинг акторів')
-]
+my_cars.add("Toyota", "Camry", 2020)
+my_cars.add("Nissan", "Tiida", 2011)
+my_cars.add("Hyundai", "Tucson", 2021)
+my_cars.add("Honda", "Civic", 2019)
+my_cars.add("BMW", "X5", 2021)
+my_cars.add("Mercedes-Benz", "E-Class", 2018)
+my_cars.add("Audi", "A6", 2022)
+my_cars.add("Ford", "Focus", 2017)
+my_cars.add("Nissan", "Altima", 2020)
+my_cars.add("Kia", "Sportage", 2018)
 
-# Підзавдання для "Пошук локацій"
-task.subtasks[0].subtasks = [
-    Task('Огляд локацій у місті'),
-    Task('Огляд локацій за містом'),
-    Task('Узгодження місць для зйомок')
-]
+my_cars.display()
 
-# Підзавдання для "Підготовка сценарію"
-task.subtasks[1].subtasks = [
-    Task('Написання основного сценарію'),
-    Task('Редагування сценарію'),
-    Task('Підготовка сценарних приміток'),
-]
+my_cars.remove("Tucson")
+my_cars.display()
+print(f"\n{len(my_cars)}")
 
-# Підзавдання для "Кастинг акторів"
-task.subtasks[2].subtasks = [
-    Task('Пошук головних акторів'),
-    Task('Пошук другорядних акторів'),
-    Task('Підготовка контрактів для акторів')
-]
+found_car = my_cars.search("X5")
+print(f"\n{found_car}")
 
-# Підзавдання для "Пошук локацій у місті"
-task.subtasks[0].subtasks[0].subtasks = [
-    Task('Вибір декорацій для зйомок'),
-    Task('Узгодження з власниками приміщень')
-]
+found_car = my_cars.search("CRV")
+print(f"\n{found_car}")
 
-# Підзавдання для "Огляд локацій за містом"
-task.subtasks[0].subtasks[1].subtasks = [
-    Task('Вибір лісу для сцени битви'),
-    Task('Пошук старовинних будівель для сцени'),
-]
-
-# Підзавдання для "Написання основного сценарію"
-task.subtasks[1].subtasks[0].subtasks = [
-    Task('Написання першої частини'),
-    Task('Написання другої частини'),
-]
-
-# Підзавдання для "Пошук головних акторів"
-task.subtasks[2].subtasks[0].subtasks = [
-    Task('Пошук актора на роль головного героя'),
-    Task('Пошук актриси на роль головної героїні')
-]
-
-project = Project(task)
-while not project.is_finished():
-    project.do_task()
+my_cars.sell_car("Фокусов А.А", "Focus")
+my_cars.sell_car("Це Р.В.", "CRV")
