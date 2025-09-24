@@ -1,89 +1,80 @@
-# Завдання 1
-# Використовуючи бінарні дерева, організуйте роботу автопарку, де зберігаються автомобілі, відсортовані за моделлю(!)
-# У однієї марки може бути багато моделей. У кожної моделі її марки унікальні.
-# Клас Car
+# Завдання 2
+# Створіть клас Cart
 # Атрибути:
-#  brand – марка (бренд, виробник) автомобіля
-#  model – модель автомобіля
-#  year – рік випуску
+#  user – ім’я користувача
+#  items – список товарів
+#  total – загальна ціна
+# Методи:
+#  add(item, price) – добавити товар у кошик
+#  delete(item, price) – видалити товар з кошика
+#  info() – вивести інформацію про кошик
+# save(fiename) – зберегти дані у файл(за замовчуванням cart.json)
+#  load(fiename) – завантажити дані з файла(за замовчуванням cart.json)
 
-import bintrees
-
-
-class Car:
-    def __init__(self, brand, model, year):
-        self.brand = brand
-        self.model = model
-        self.year = year
-
-    def __str__(self):
-        return f"{self.brand:<15}{self.model:<10}\t{self.year}"
+import json
 
 
-class CarPark:
-    def __init__(self):
-        self.cars = bintrees.AVLTree()
+class Cart:
+    def __init__(self, user):
+        self.user = user
+        self.items = []
+        self.total = 0
 
-    def add(self, brand, model, year):
-        """Додати автомобіль у автопарк"""
-        car = Car(brand, model, year)
-        self.cars.insert(key=model, value=car)
+    def add(self):
+        item = input("Введіть товар: ")
+        price = float(input("Та вкажіть його ціну: "))
 
-    def display(self):
-        """Вивести всі авто"""
-        print()
-        for model in self.cars:
-            print(self.cars[model])
+        self.items.append(item)
+        self.total += price
 
-    def remove(self, model):
-        """Видалити автомобіль"""
-        self.cars.remove(model)
-
-    def search(self, model):
-        """Пошук авто за моделлю"""
-        return self.cars.get(model, None)
-
-    def __len__(self):
-        """Кількість авто"""
-        return len(self.cars)
-
-    def sell_car(self, client, model):
-        """Продати авто клієнту"""
-        if model in self.cars:
-            car = self.cars[model]
-            self.cars.remove(model)
-            print(f"\n{car}\nпродана клієнту {client}")
+    def delete(self, item, price):
+        if item in self.items:
+            self.items.remove(item)
+            self.total -= price
         else:
-            print(
-                f"{model} - на жаль, такої моделі немає в нашому автопарку, "
-                f"клієнту {client} ми нічим не допоможемо"
-            )
+            print(f"Товару \"{item}\" немає в кошику.")
+
+    def info(self):
+        print()
+        print(f"У кошику клієнта {self.user} знаходяться такі товари:")
+        for item in self.items:
+            print(f"\t{item}")
+        print(f"На загальну суму: {self.total:.2f} грн.")
+
+    # save(fiename) – зберегти дані у файл(за замовчуванням cart.json)
+    def save(self, filename="cart.json"):
+        with open(filename, 'r', encoding='utf-8') as file:
+            data_all = json.load(file)
+
+        data_all[self.user] = {
+            "items": self.items,
+            "total": self.total,
+        }
+
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(data_all, file, indent=4)
+
+    #  load(fiename) – завантажити дані з файла(за замовчуванням cart.json)
+    def load(self, filename="cart.json"):
+        with open(filename, 'r', encoding='utf-8') as file:
+            data_dict: dict = json.load(file)
+        user_data = data_dict[self.user]
+        print(user_data)
+        self.items = user_data["items"]
+        self.total = user_data["total"]
 
 
-my_cars = CarPark()
 
-my_cars.add("Toyota", "Camry", 2020)
-my_cars.add("Nissan", "Tiida", 2011)
-my_cars.add("Hyundai", "Tucson", 2021)
-my_cars.add("Honda", "Civic", 2019)
-my_cars.add("BMW", "X5", 2021)
-my_cars.add("Mercedes-Benz", "E-Class", 2018)
-my_cars.add("Audi", "A6", 2022)
-my_cars.add("Ford", "Focus", 2017)
-my_cars.add("Nissan", "Altima", 2020)
-my_cars.add("Kia", "Sportage", 2018)
+if __name__ == '__main__':
+   my_cart = Cart("John")
 
-my_cars.display()
+   my_cart.add()
+   my_cart.add()
+   my_cart.info()
 
-my_cars.remove("Tucson")
-my_cars.display()
-print(f"\n{len(my_cars)}")
+   my_cart.save()
 
-found_car = my_cars.search("X5")
-print(f"\n{found_car}")
-
-found_car = my_cars.search("CRV")
-print(f"\n{found_car}")
-
-my_cars.sell_car("Фокусов А.А", "Focus")
-my_cars.sell_car("Це Р.В.", "CRV")
+   my_cart1 = Cart("Mary")
+   my_cart1.add()
+   my_cart1.save()
+   my_cart1.info()
