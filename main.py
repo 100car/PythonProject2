@@ -33,7 +33,7 @@ def new_game():
         counter += 1
         if counter == MAX_ATTEMPTS + 1:
             print(f"Використані всі спроби. Ви не вгадали загадане число {secret_number} і програли!")
-            return '0'
+            return 0
 
         user_input = input(f"Спроба №{counter}. Введіть число від 1 до 100: ")
 
@@ -49,7 +49,7 @@ def new_game():
 
         if num == secret_number:
             print(f"Вітаю! Ви вгадали! Загадане число - {secret_number}")
-            return '1'
+            return 1
         elif num < secret_number:
             print("Більше!")
         else:
@@ -153,7 +153,7 @@ def save(current_dict, filename="ugadayka.json"):
 
 def show_results():
     """
-    Виводить результати поточного гравця та, за бажанням, всі результати.
+    Виводить результати поточного гравця та, за бажанням, всі попередні результати.
 
     Логіка:
     - Показує кількість перемог та поразок поточного гравця.
@@ -162,13 +162,21 @@ def show_results():
     """
 
     print(f"Ваш результат: перемог - {current_results[current_user]["wins"]}, поразок - {current_results[current_user]["losses"]}.")
-    choice = input("Вивести всі результати? (Y/N): ")
+
+    choice = input("Вивести всі ПОТОЧНІ попередні результати? (Y/N): ")
     if choice.lower() in ("y", "н", "так"):
         print(json.dumps(current_results, indent=4, ensure_ascii=False))
 
+    choice = input("Вивести всі попередні результати, крім поточних, з файлу? (Y/N): ")
+    if choice.lower() in ("y", "н", "так"):
+        file_results = load()
+        print(json.dumps(file_results, indent=4, ensure_ascii=False))
+
 
 # Опції меню для передачі у функцію show_menu
-options = ["Зміна гравця", "Нова гра", "Завантажити", "Зберегти", "Показати", "Закінчити"]
+# Опція "Завантажити" тут буде лишня. Функцію load використовуємо в show_results()
+# А з поточного зберігаємо, дописуючи, або в поточне завантажуємо збережене (не робимо це, не завантажуємо)
+options = ["Зміна гравця", "Нова гра", "Зберегти", "Показати", "Закінчити"]
 
 # створюємо "нульові" записи
 current_results = {}
@@ -189,27 +197,28 @@ while True:
         if current_user not in current_results:
             current_results[current_user] = {"wins": 0, "losses": 0}
         # оновити результат гравця в поточному словнику
-        if current_result == "1":
+        if current_result == 1:
             current_results[current_user]["wins"] += 1
-        elif current_result == "0":
+        elif current_result == 0:
             current_results[current_user]["losses"] += 1
         else:
-            print("Такого не могло бути (або '0', або '1'), але по любому, давайте знову вибирати.")
+            print("Такого не могло бути (або 0, або 1), але по любому, давайте знову вибирати.")
             continue
+    # elif user_choice == options[2]: # Завантажити
+    #     previous_dict = load()
+    #     current_results = merge_nested_dicts(current_results, previous_dict)
 
-    elif user_choice == options[2]: # Завантажити
-        previous_dict = load()
-        current_results = merge_nested_dicts(current_results, previous_dict)
-
-    elif user_choice == options[3]: # Зберегти
+    elif user_choice == options[2]: # Зберегти
         previous_dict = load()
         current_results = merge_nested_dicts(current_results, previous_dict)
         save(current_results)
+        current_results = {}
+        current_results[current_user] = {"wins": 0, "losses": 0}
 
-    elif user_choice == options[4]: # Показати результат
+    elif user_choice == options[3]: # Показати результат
         show_results()
 
-    elif user_choice == options[5]: # Закінчити
+    elif user_choice == options[4]: # Закінчити
         print("Гру закінчено.")
         show_results()
         break
