@@ -1,102 +1,90 @@
 # Завдання 1
-# Користувач вводить з клавіатури значення у список.
-# Після чого запускаються два потоки. Перший потік знаходить максимум у списку. Другий потік знаходить мінімум
-# у списку. Результати обчислень виведіть на екран.
-
-# import threading
-#
-#
-# def maximum(nums, results: dict):
-#     print("Функція maximum почала свою роботу.")
-#     result = max(nums)
-#     results["max"] = result
-#     print("Функція maximum закінчила свою роботу.")
-#
-#
-# def minimum(nums, results: dict):
-#     print("Функція minimum почала свою роботу.")
-#     result = min(nums)
-#     results["min"] = result
-#     print("Функція minimum закінчила свою роботу.")
-#
-#
-# def get_nums():
-#     nums = []
-#     while True:
-#         num = input("Введіть число зі списку або натисніть Enter: ")
-#         if num == "":
-#             return nums
-#         nums.append(int(num))
-#
-#
-# results = {}
-# my_nums = get_nums()
-# thread1 = threading.Thread(target=maximum, args=(my_nums, results))
-# thread2 = threading.Thread(target=minimum, args=(my_nums, results))
-#
-# thread1.start()
-# thread2.start()
-#
-# thread1.join()
-# thread2.join()
-#
-# print(results)
-
-# Завдання 2
-# Користувач вводить з клавіатури значення у список. Після чого запускаються два потоки. Перший потік знаходить
-# суму елементів у списку. Другий потік знаходить середнє арифметичне у списку. Результати обчислень
-# виведіть на екран.
-
+# Програма складається з трьох потоків. Перший просить в користувача вводити числа, поки не введено
+# порожній рядок, та зберігає числа в список. Інші два потоки чекають поки перший завершить
+# роботу, і вже потім запускаються. Один рахує суму чисел в списку, інший рахує середнє арифметичне.
+# Список чисел, сума та середнє виводяться на екран
 import threading
 import time
 
 
-def get_nums():
-    nums = []
+def get_nums(nums):
+    """
+    Просить користувача вводити числа до тих пір, поки не буде
+    введено порожній рядок. Додає числа в переданий список.
+    """
     while True:
-        num = input("Введіть число зі списку або натисніть Enter: ")
+        num = input("Введіть число для збереження в списку або натисніть Enter: ")
         if num == "":
-            return nums
+            return
         nums.append(int(num))
 
 
-def summa(nums, results: dict):
-    print("Функція suma почала свою роботу.")
+def calculate_sum_only(nums):
+    """
+    Обчислює суму чисел у списку.
 
+    :param nums: список чисел
+    :return: сума чисел
+    """
     result = 0
     for num in nums:
         result += num
-    results["suma"] = result
+    return result
 
+
+def sum_numbers(nums, results: dict):
+    """
+    Обчислює суму чисел та зберігає її у словник results під ключем 'suma'.
+
+    :param nums: список чисел
+    :param results: словник для збереження результату
+    """
+    print("Функція sum_numbers почала свою роботу.")
+    results["Сума"] = calculate_sum_only(nums)
     time.sleep(0.5)
+    print("Функція sum_numbers закінчила свою роботу.")
 
-    print("Функція suma закінчила свою роботу.")
 
+def average_numbers(nums, results: dict):
+    """
+    Обчислює середнє арифметичне чисел у списку та зберігає у словник results під ключем 'average'.
+    Якщо список порожній, записує повідомлення про неможливість обчислення.
 
-def average(nums, results: dict):
-    print("Функція average почала свою роботу.")
-
-    result = 0
-    for num in nums:
-        result += num
-
-    result = result / len(nums)
-    results["average"] = result
-
+    :param nums: список чисел
+    :param results: словник для збереження результату
+    """
+    print("Функція average_numbers почала свою роботу.")
+    if len(nums) == 0:
+        results["Середнє"] = "Чисел немає, як можна середнє порахувати?"
+    else:
+        results["Середнє"] = calculate_sum_only(nums) / len(nums)
     time.sleep(0.5)
+    print("Функція average_numbers закінчила свою роботу.")
 
-    print("Функція average закінчила свою роботу.")
+
+def main():
+    results = {}
+    my_nums = []
+
+    # Створення потоків
+    thread1 = threading.Thread(target=get_nums, args=(my_nums,))
+    thread2 = threading.Thread(target=sum_numbers, args=(my_nums, results))
+    thread3 = threading.Thread(target=average_numbers, args=(my_nums, results))
+
+    # Запуск першого потоку і очікування його завершення
+    thread1.start()
+    thread1.join()
+
+    # Запуск інших потоків
+    thread2.start()
+    thread3.start()
+    thread2.join()
+    thread3.join()
+
+    # Вивід результатів
+    print("Список введених чисел:", my_nums)
+    print("Результати обчислень:", results)
 
 
-results = {}
-my_nums = get_nums()
-thread1 = threading.Thread(target=summa, args=(my_nums, results))
-thread2 = threading.Thread(target=average, args=(my_nums, results))
-
-thread1.start()
-thread2.start()
-
-thread1.join()
-thread2.join()
-
-print(results)
+if __name__ == "__main__":
+    main()
