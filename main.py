@@ -79,7 +79,7 @@ def add_movie(film: Film):
     return {"status": "ok", "message": "Фільм додано успішно", "film": film_data}
 
 
-# 3. Видалення фільму за ID
+# 3. Видалення фільму
 @app.delete("/movies/{movie_id}")
 def delete_movie(movie_id: int):
     films = load_films()

@@ -4,7 +4,7 @@ import requests
 def get_movie():
     movie_id = input("Введіть ID фільму: ").strip()
     if not movie_id.isdigit():
-        print("Помилка: ID повинен бути числом!")
+        print("Помилка: ID повинен бути числом!!!")
         return
     result = requests.get(f"http://localhost:8000/movies/{movie_id}")
     data = result.json()
